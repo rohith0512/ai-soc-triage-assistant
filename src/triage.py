@@ -9,15 +9,27 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 def triage_alert(alert_text: str) -> dict:
     prompt = f"""
-You are a SOC Analyst. Analyze the following security alert and respond ONLY in this exact JSON format with no extra text, no markdown, no backticks:
+You are an expert SOC Analyst with 10 years of experience in incident response and threat detection.
+
+Analyze the following security alert and respond ONLY in this exact JSON format with no extra text, no markdown, no backticks:
 
 {{
   "severity": "Low or Medium or High or Critical",
-  "mitre_tactic": "e.g. Initial Access",
-  "mitre_technique": "e.g. T1078 - Valid Accounts",
-  "summary": "One sentence explaining what happened",
-  "recommended_action": "What the analyst should do next"
+  "mitre_tactic": "Primary MITRE ATT&CK tactic",
+  "mitre_technique": "Primary technique ID and name e.g. T1078 - Valid Accounts",
+  "additional_techniques": "Other relevant technique IDs if multiple are present, else None",
+  "confidence": "Low or Medium or High - how confident you are in this classification",
+  "summary": "Two sentence explanation of what happened and why it is a threat",
+  "immediate_action": "What the analyst must do in the next 15 minutes",
+  "investigation_steps": "Three specific steps to investigate this alert further",
+  "false_positive_check": "One question the analyst should ask to rule out a false positive"
 }}
+
+Severity guidelines:
+- Critical: Active ransomware, confirmed breach, data exfiltration in progress
+- High: Brute force success, malware execution, C2 communication detected
+- Medium: Multiple failed logins, suspicious process, policy violation
+- Low: Single failed login, minor anomaly, informational
 
 Alert:
 {alert_text}

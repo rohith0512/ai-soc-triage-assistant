@@ -3,6 +3,7 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from triage import triage_alert
+from logger import get_windows_events, format_event_for_triage
 
 test_alert = """
 Event: Failed login attempt
@@ -20,13 +21,16 @@ else:
     print("=" * 50)
     print("SOC ALERT TRIAGE REPORT")
     print("=" * 50)
-    print(f"Severity         : {result['severity']}")
-    print(f"MITRE Tactic     : {result['mitre_tactic']}")
-    print(f"MITRE Technique  : {result['mitre_technique']}")
-    print(f"Summary          : {result['summary']}")
-    print(f"Recommended Action: {result['recommended_action']}")
+    print(f"Severity              : {result['severity']}")
+    print(f"Confidence            : {result['confidence']}")
+    print(f"MITRE Tactic          : {result['mitre_tactic']}")
+    print(f"MITRE Technique       : {result['mitre_technique']}")
+    print(f"Additional Techniques : {result['additional_techniques']}")
+    print(f"Summary               : {result['summary']}")
+    print(f"Immediate Action      : {result['immediate_action']}")
+    print(f"Investigation Steps   : {result['investigation_steps']}")
+    print(f"False Positive Check  : {result['false_positive_check']}")
     print("=" * 50)
-from logger import get_windows_events, format_event_for_triage
 
 print("\n--- TESTING WINDOWS EVENT LOG INGESTION ---")
 print("Pulling last 3 failed logon events (Event ID 4625)...")
@@ -41,6 +45,7 @@ for i, event in enumerate(events):
         alert_text = format_event_for_triage(event)
         result = triage_alert(alert_text)
         if "error" not in result:
-            print(f"Severity: {result['severity']}")
-            print(f"MITRE Technique: {result['mitre_technique']}")
-            print(f"Action: {result['recommended_action']}")
+            print(f"Severity        : {result['severity']}")
+            print(f"Confidence      : {result['confidence']}")
+            print(f"MITRE Technique : {result['mitre_technique']}")
+            print(f"Immediate Action: {result['immediate_action']}")
