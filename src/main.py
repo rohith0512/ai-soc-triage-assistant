@@ -36,11 +36,9 @@ else:
     print(f"False Positive Check  : {result['false_positive_check']}")
     print("=" * 50)
 
-    # Log to database
     log_triage_result(test_alert, result)
     print("✓ Result logged to database")
 
-    # Generate incident report
     report_path = generate_report(test_alert, result)
     print(f"✓ Incident report saved to: {report_path}")
 
@@ -64,4 +62,24 @@ for i, event in enumerate(events):
             log_triage_result(alert_text, result)
             generate_report(alert_text, result)
 
-print("\n✓ Day 3 complete — all results logged and reports generated")
+print("\n--- TESTING EVENT ID 4720 - NEW USER ACCOUNT CREATED ---")
+print("Pulling last 3 user account creation events...")
+
+events_4720 = get_windows_events(event_id=4720, count=3)
+
+for i, event in enumerate(events_4720):
+    if "error" in event:
+        print(f"Error pulling logs: {event['error']}")
+    else:
+        print(f"\nEvent {i+1}:")
+        alert_text = format_event_for_triage(event)
+        result = triage_alert(alert_text)
+        if "error" not in result:
+            print(f"Severity        : {result['severity']}")
+            print(f"Confidence      : {result['confidence']}")
+            print(f"MITRE Technique : {result['mitre_technique']}")
+            print(f"Immediate Action: {result['immediate_action']}")
+            log_triage_result(alert_text, result)
+            generate_report(alert_text, result)
+
+print("\n✓ All results logged and reports generated")
