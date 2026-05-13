@@ -3,7 +3,11 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from triage import triage_alert
-from logger import get_windows_events, format_event_for_triage
+from logger import get_windows_events, format_event_for_triage, init_db, log_triage_result
+from reporter import generate_report
+
+# Initialize database
+init_db()
 
 test_alert = """
 Event: Failed login attempt
@@ -32,7 +36,15 @@ else:
     print(f"False Positive Check  : {result['false_positive_check']}")
     print("=" * 50)
 
-print("\n--- TESTING WINDOWS EVENT LOG INGESTION ---")
+    # Log to database
+    log_triage_result(test_alert, result)
+    print("✓ Result logged to database")
+
+    # Generate incident report
+    report_path = generate_report(test_alert, result)
+    print(f"✓ Incident report saved to: {report_path}")
+
+print("\n--- WINDOWS EVENT LOG INGESTION ---")
 print("Pulling last 3 failed logon events (Event ID 4625)...")
 
 events = get_windows_events(event_id=4625, count=3)
@@ -49,3 +61,7 @@ for i, event in enumerate(events):
             print(f"Confidence      : {result['confidence']}")
             print(f"MITRE Technique : {result['mitre_technique']}")
             print(f"Immediate Action: {result['immediate_action']}")
+            log_triage_result(alert_text, result)
+            generate_report(alert_text, result)
+
+print("\n✓ Day 3 complete — all results logged and reports generated")
