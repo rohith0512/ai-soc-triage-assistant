@@ -1,11 +1,13 @@
 import streamlit as st
 import sys
 import os
+import pandas as pd
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
 from triage import triage_alert
 from logger import init_db, log_triage_result
 from reporter import generate_report
+from ip_lookup import lookup_ip, extract_ips
 
 # Initialize database
 init_db()
@@ -56,12 +58,12 @@ with col2:
 
 with col1:
     st.subheader("📋 Paste Security Alert")
-    
+
     if selected_quick != "None":
         default_text = QUICK_ALERTS[selected_quick]
     else:
         default_text = ""
-    
+
     alert_text = st.text_area(
         "Enter alert details below:",
         value=default_text,
@@ -69,8 +71,50 @@ with col1:
         placeholder="Paste your security alert here..."
     )
 
+# File Upload Section
+st.divider()
+st.subheader("📂 Upload Log File")
+uploaded_file = st.file_uploader(
+    "Upload a CSV or TXT log file from another machine:",
+    type=["csv", "txt"]
+)
+
+if uploaded_file is not None:
+    if uploaded_file.name.endswith(".csv"):
+        df = pd.read_csv(uploaded_file)
+        st.success(f"✓ Loaded {len(df)} log entries")
+        st.dataframe(df.head(5), use_container_width=True)
+
+        if st.button("🔍 Triage All Events", use_container_width=True, key="triage_csv_file"):
+            for i, row in df.iterrows():
+                alert_text = " | ".join([f"{col}: {val}" for col, val in row.items()])
+                with st.spinner(f"Triaging event {i+1} of {len(df)}..."):
+                    result = triage_alert(alert_text)
+                if "error" not in result:
+                    st.write(f"**Event {i+1}:** {result['severity']} — {result['mitre_technique']}")
+                    log_triage_result(alert_text, result)
+                    generate_report(alert_text, result)
+            st.success("✓ All events triaged and logged")
+
+    else:
+        content = uploaded_file.read().decode("utf-8")
+        st.text_area("File contents:", content, height=150)
+
+        if st.button("🔍 Triage This Log", use_container_width=True, key="triage_txt_file"):
+            with st.spinner("Analyzing..."):
+                result = triage_alert(content)
+            if "error" not in result:
+                st.write(f"**Severity:** {result['severity']}")
+                st.write(f"**MITRE Technique:** {result['mitre_technique']}")
+                st.write(f"**Immediate Action:** {result['immediate_action']}")
+                log_triage_result(content, result)
+                generate_report(content, result)
+                st.success("✓ Logged and report generated")
+
+st.divider()
+
 # Analyze button
-if st.button("🔍 Analyze Alert", type="primary", use_container_width=True):
+if st.button("🔍 Analyze Alert", type="primary", use_container_width=True, key="analyze_manual"):
     if not alert_text.strip():
         st.error("Please paste an alert or select a quick test alert.")
     else:
@@ -131,3 +175,33 @@ if st.button("🔍 Analyze Alert", type="primary", use_container_width=True):
 
             st.success("✓ Result logged to database")
             st.success(f"✓ Incident report saved to: {report_path}")
+
+            # IP Reputation Section
+            st.divider()
+            st.subheader("🌐 IP Reputation Lookup")
+
+            ips = extract_ips(alert_text)
+
+            if ips:
+                for ip in ips:
+                    with st.spinner(f"Looking up {ip}..."):
+                        ip_data = lookup_ip(ip)
+
+                    if "error" in ip_data:
+                        st.warning(f"Could not look up {ip}: {ip_data['error']}")
+                    else:
+                        col1, col2, col3, col4 = st.columns(4)
+                        with col1:
+                            st.metric("IP Address", ip_data["ip"])
+                        with col2:
+                            st.metric("Country", ip_data["country"])
+                        with col3:
+                            score = ip_data["abuse_score"]
+                            color = "🔴" if score > 50 else "🟡" if score > 10 else "🟢"
+                            st.metric("Abuse Score", f"{color} {score}/100")
+                        with col4:
+                            st.metric("Total Reports", ip_data["total_reports"])
+
+                        st.caption(f"ISP: {ip_data['isp']} | Tor Exit Node: {'Yes ⚠️' if ip_data['is_tor'] else 'No'}")
+            else:
+                st.info("No public IP addresses found in this alert.")
