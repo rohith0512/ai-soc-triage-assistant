@@ -86,11 +86,21 @@ if uploaded_file is not None:
         st.dataframe(df.head(5), use_container_width=True)
 
         if st.button("🔍 Triage All Events", use_container_width=True, key="triage_csv_file"):
+            # Correlation check — detect brute force pattern
+            if "Id" in df.columns:
+                event_4625_count = len(df[df["Id"] == 4625])
+                if event_4625_count >= 3:
+                    st.error(f"🚨 BRUTE FORCE PATTERN DETECTED — {event_4625_count} failed login attempts in this log. Escalating to HIGH severity.")
+
             for i, row in df.iterrows():
                 alert_text = " | ".join([f"{col}: {val}" for col, val in row.items()])
                 with st.spinner(f"Triaging event {i+1} of {len(df)}..."):
                     result = triage_alert(alert_text)
                 if "error" not in result:
+                    # Escalate severity if brute force pattern detected
+                    if "Id" in df.columns and df["Id"].eq(4625).sum() >= 3:
+                        if result["severity"] in ["Low", "Medium"]:
+                            result["severity"] = "High"
                     st.write(f"**Event {i+1}:** {result['severity']} — {result['mitre_technique']}")
                     log_triage_result(alert_text, result)
                     generate_report(alert_text, result)
