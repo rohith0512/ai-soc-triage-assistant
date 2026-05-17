@@ -76,16 +76,16 @@ Open your browser at `http://localhost:8501`
 ## 🖼️ Demo Screenshots
 
 ### Main Dashboard
-![Main Dashboard](screenshots/dashboard.png)
+![Main Dashboard](dashboard.png)
 
 ### Triage Report
-![Triage Report](screenshots/triage_report.png)
+![Triage Report](triage_report.png)
 
 ### IP Reputation Lookup
-![IP Reputation](screenshots/ip_reputation.png)
+![IP Reputation](ip_reputation.png)
 
 ### Alert History Dashboard
-![Alert History](screenshots/alert_history.png)
+![Alert History](alert_history.png)
 
 ## 🧪 Tested Attack Scenarios
 
