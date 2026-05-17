@@ -1,31 +1,27 @@
-# AI-Powered SOC Alert Triage Assistant
+# 🛡️ AI-Powered SOC Alert Triage Assistant
 
-## Overview
-An AI-assisted security alert triage tool that classifies alerts by severity,
-maps them to MITRE ATT&CK techniques, and generates analyst-ready summaries
-to reduce mean time to triage.
+An AI-assisted security alert triage tool built for SOC analysts. Classifies alerts by severity, maps them to MITRE ATT&CK techniques, performs IP reputation lookups, and auto-generates incident reports.
 
-## Features
-- Alert severity classification (Low / Medium / High / Critical)
-- MITRE ATT&CK tactic and technique mapping
-- Analyst action recommendation
-- Case logging to SQLite database
-- Streamlit web UI
+## 🎯 What It Does
 
-## Tech Stack
+- **AI Triage** — Analyzes security alerts using Groq API (LLaMA 3.3 70B) and returns structured triage output
+- **MITRE ATT&CK Mapping** — Maps every alert to relevant tactics and techniques automatically
+- **Severity Classification** — Low / Medium / High / Critical with confidence scoring
+- **IP Reputation Lookup** — Real-time threat intel via AbuseIPDB (country, abuse score, ISP, Tor detection)
+- **Windows Event Log Ingestion** — Pulls live logs directly from Windows Security event log
+- **File Upload** — Upload CSV or TXT log files from any machine for bulk triage
+- **Brute Force Correlation** — Automatically detects and escalates brute force patterns
+- **SQLite Case Logging** — Every triage result saved to database automatically
+- **Automated Incident Reports** — Markdown report generated for every alert
+- **Alert History Dashboard** — View, filter, and analyze all past triage results
+
+## 🖥️ Tech Stack
+
 - Python 3.x
 - Groq API (LLaMA 3.3 70B)
+- AbuseIPDB API
 - SQLite
 - Streamlit
+- PowerShell (Windows Event Log ingestion)
 
-## Project Status
-🔧 In Progress
-
-## Setup Instructions
-(coming soon)
-
-## Demo
-(coming soon)
-
-## Author
-Rohith — ECE Graduate | Cybersecurity Enthusiast | Aspiring SOC Analyst
+## 📁 Project Structure
