@@ -24,4 +24,20 @@ An AI-assisted security alert triage tool built for SOC analysts. Classifies ale
 - Streamlit
 - PowerShell (Windows Event Log ingestion)
 
+
+
 ## 📁 Project Structure
+
+## 🖼️ Demo Screenshots
+
+### Main Dashboard
+![Main Dashboard](screenshots/Screenshot%202026-05-17%20143225.png)
+
+### Triage Report
+![Triage Report](screenshots/Screenshot%202026-05-17%20143307.png)
+
+### IP Reputation Lookup
+![IP Reputation](screenshots/Screenshot%202026-05-17%20143329.png)
+
+### Alert History Dashboard
+![Alert History](screenshots/Screenshot%202026-05-17%20143346.png)
